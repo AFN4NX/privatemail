@@ -1,0 +1,21 @@
+Options -Indexes
+DirectoryIndex index.php
+
+# Block direct access to sensitive configuration/data files.
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|README\.md)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "(?i)\.(sqlite|sqlite3|db|bak|old|zip|tar|sql)([-.].*)?$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+ <Files "sw.js">
+  Header set Cache-Control "no-cache"
+ </Files>
+</IfModule>
+
+<FilesMatch "(?i)\.(pmb|stage|key)$">
+ Require all denied
+</FilesMatch>

@@ -1,0 +1,44 @@
+<?php
+declare(strict_types=1);
+$checks=['PHP 8.1+'=>version_compare(PHP_VERSION,'8.1','>=')];foreach(['pdo_sqlite','mbstring','imap','openssl','dom'] as $extension)$checks['PHP '.$extension]=extension_loaded($extension);
+foreach(['storage','database'] as $dir){$path=__DIR__.'/'.$dir;if(!is_dir($path))@mkdir($path,0700,true);$checks['Writable '.$dir]=is_dir($path)&&is_writable($path);}
+$host=(string)($_SERVER['SERVER_NAME']??'');$checks['HTTPS or localhost']=(!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off')||in_array($host,['localhost','127.0.0.1','::1'],true);
+function setupEscape(string $v):string{return htmlspecialchars($v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');}
+$ready=!in_array(false,$checks,true);$error='';$step=0;$locked=false;
+if($ready){
+ require __DIR__.'/bootstrap.php';
+ $fresh=SetupService::needed();$owner=Auth::check();$locked=!$fresh&&(!$owner||empty($_SESSION['setup_wizard_step']));
+ if($locked){http_response_code(404);}else{
+  $step=$fresh?1:(int)($_SESSION['setup_wizard_step']??2);
+  if($fresh)try{SetupService::ensureToken();}catch(Throwable $e){$error=$e->getMessage();}
+  if($_SERVER['REQUEST_METHOD']==='POST')try{
+   if(!Security::verifyCsrf($_POST['_csrf']??null))throw new RuntimeException('Security check failed. Refresh and try again.');
+   $action=(string)($_POST['action']??'');
+   if($fresh&&$action==='claim'){
+    if((string)($_POST['password']??'')!==(string)($_POST['confirm']??''))throw new InvalidArgumentException('Passwords do not match.');
+    SetupService::claim((string)($_POST['token']??''),(string)($_POST['password']??''));header('Location: /setup.php',true,303);exit;
+   }
+   if(!$owner||$fresh)throw new RuntimeException('Complete the password step first.');
+   if($step===2&&in_array($action,['mailbox','skip_mailbox'],true)){
+    if($action==='mailbox'){$name=trim((string)($_POST['name']??''));if($name===''||mb_strlen($name)>60)throw new InvalidArgumentException('Enter a mailbox name.');$config=SettingsService::connection($_POST,[]);SettingsService::test($config);MailboxRegistry::save(0,$name,$config);}
+    $_SESSION['setup_wizard_step']=3;
+   }elseif($step===3&&in_array($action,['domain','skip_domain'],true)){
+    if($action==='domain')MailboxRegistry::saveDomain(0,(string)($_POST['domain']??''),(int)($_POST['account']??0),true);$_SESSION['setup_wizard_step']=4;
+   }elseif($step===4&&$action==='finish'){
+    $theme=(string)($_POST['theme']??'dark');$refresh=(string)($_POST['refresh']??'10');if(!in_array($theme,['dark','light','system'],true)||!in_array($refresh,['0','10','60'],true))throw new InvalidArgumentException('Invalid preference.');Database::setSetting('theme',$theme);Database::setSetting('refresh_interval',$refresh);unset($_SESSION['setup_wizard_step']);header('Location: /',true,303);exit;
+   }else throw new InvalidArgumentException('Invalid setup step.');
+   header('Location: /setup.php',true,303);exit;
+  }catch(Throwable $e){$error=$e instanceof RuntimeException||$e instanceof InvalidArgumentException?$e->getMessage():'Unable to complete this step. Check server configuration.';}
+ }
+}
+?>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Set up PrivateMail</title><link rel="stylesheet" href="/assets/tokens.css?v=10"><link rel="stylesheet" href="/assets/app.css?v=14"><link rel="stylesheet" href="/assets/settings.css?v=7"><link rel="stylesheet" href="/assets/migration.css?v=1"></head><body class="setup-page" data-theme="dark"><main class="setup-card"><a class="setup-brand" href="/">PrivateMail<span>.</span></a>
+<?php if(!$ready):?><h1>Server check</h1><p class="muted">Resolve the missing requirements, then reload this page.</p><?php foreach($checks as $label=>$ok):?><div class="setup-check"><span><?=setupEscape($label)?></span><strong class="<?=$ok?'ready':'failed'?>"><?=$ok?'Ready':'Needs attention'?></strong></div><?php endforeach;?>
+<?php elseif($locked):?><h1>Setup is locked</h1><p class="muted">This installation already has an owner.</p><a class="button primary" href="/login.php">Sign in</a>
+<?php else:?><div class="setup-progress" aria-label="Installation progress"><?php foreach(['Access','Mailbox','Domain','Finish'] as $i=>$label):?><span class="<?=$step===$i+1?'active':''?>"><?=($i+1).'. '.$label?></span><?php endforeach;?></div>
+<?php if($error):?><div class="notice error" role="alert"><?=setupEscape($error)?></div><?php endif;?>
+<?php if($step===1):?><h1>Your private inbox starts here.</h1><p class="muted">Server checks passed. Create the app password to claim this installation.</p><p class="setup-note">Open <strong>storage/setup-token.php</strong> in your hosting File Manager and copy only the token inside the quotes after return. It is not shown publicly.</p><form method="post" class="settings-form"><input type="hidden" name="_csrf" value="<?=Security::e(Security::csrfToken())?>"><input type="hidden" name="action" value="claim"><label class="settings-label">Private setup token<input name="token" autocomplete="off" required></label><label class="settings-label">App password<input type="password" name="password" minlength="12" maxlength="72" autocomplete="new-password" required></label><label class="settings-label">Confirm password<input type="password" name="confirm" minlength="12" maxlength="72" autocomplete="new-password" required></label><button class="button primary">Secure installation &amp; continue</button></form>
+<?php elseif($step===2):?><h1>Connect your first mailbox.</h1><p class="muted">Moving from another host? Restore your encrypted migration backup instead.</p><a class="button" href="/backup.php">Restore a backup</a><form method="post" class="settings-form"><input type="hidden" name="_csrf" value="<?=Security::e(Security::csrfToken())?>"><label class="settings-label">Mailbox name<input name="name" placeholder="Personal" required></label><div class="connection-fields"><label class="settings-label">IMAP host<input name="host" placeholder="mail.example.com" required></label><label class="settings-label">Port<input type="number" name="port" value="993" min="1" max="65535" required></label></div><label class="settings-label">Encryption<select name="tls"><option value="ssl">SSL / TLS</option><option value="tls">STARTTLS</option></select></label><label class="settings-label">Username<input name="username" required></label><label class="settings-label">Mailbox password<input type="password" name="imap_password" autocomplete="new-password" required></label><input type="hidden" name="folder" value="INBOX"><button class="button primary" name="action" value="mailbox">Test, save &amp; continue</button></form><form method="post" class="setup-skip"><input type="hidden" name="_csrf" value="<?=Security::e(Security::csrfToken())?>"><button class="text-button" name="action" value="skip_mailbox">Set up later</button></form>
+<?php elseif($step===3):?><h1>Add a receiving domain.</h1><p class="muted">Your MX and catch-all routing must already deliver to the chosen mailbox.</p><form method="post" class="settings-form"><input type="hidden" name="_csrf" value="<?=Security::e(Security::csrfToken())?>"><label class="settings-label">Domain<input name="domain" placeholder="example.com" required></label><label class="settings-label">Receiving mailbox<select name="account" required><option value="">Choose mailbox</option><?php foreach(MailboxRegistry::all() as $a):?><option value="<?=(int)$a['id']?>"><?=Security::e($a['name'])?></option><?php endforeach;?></select></label><button class="button primary" name="action" value="domain">Save &amp; continue</button></form><form method="post" class="setup-skip"><input type="hidden" name="_csrf" value="<?=Security::e(Security::csrfToken())?>"><button class="text-button" name="action" value="skip_domain">Set up later</button></form>
+<?php else:?><h1>Make yourself at home.</h1><form method="post" class="settings-form"><input type="hidden" name="_csrf" value="<?=Security::e(Security::csrfToken())?>"><fieldset class="choice-field"><legend>Appearance</legend><div class="interval-choices"><?php foreach(['dark'=>'Dark','light'=>'Light','system'=>'System'] as $value=>$label):?><label class="choice-pill"><input type="radio" name="theme" value="<?=$value?>" <?=$value==='dark'?'checked':''?>><span><?=$label?></span></label><?php endforeach;?></div></fieldset><fieldset class="choice-field"><legend>Auto refresh</legend><div class="interval-choices"><?php foreach(['0'=>'Off','10'=>'10s','60'=>'1m'] as $value=>$label):?><label class="choice-pill"><input type="radio" name="refresh" value="<?=$value?>" <?=(string)$value==='10'?'checked':''?>><span><?=$label?></span></label><?php endforeach;?></div></fieldset><button class="button primary" name="action" value="finish">Open PrivateMail</button></form><?php endif;?>
+<?php endif;?></main></body></html>

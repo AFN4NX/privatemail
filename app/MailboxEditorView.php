@@ -1,0 +1,12 @@
+<?php if(!defined('PRIVATEMAIL_SETTINGS_VIEW')){http_response_code(404);exit;}?>
+<section class="card" id="mailboxEditor"><div class="card-title"><span class="card-icon"><?=layoutIcon('mail')?></span><div><h2><?=$editRow?'Edit mailbox':'Add mailbox'?></h2><p>Test your mailbox before saving changes.</p></div></div>
+<form method="post" class="settings-form" id="imapSettingsForm"><?php settingsHidden('imap');?><input type="hidden" name="account_id" value="<?=$editRow?(int)$editRow['id']:0?>"><label class="settings-label">Mailbox name<input name="account_name" maxlength="60" value="<?=Security::e((string)($_POST['account_name']??($editRow['name']??'')))?>" placeholder="Work, Personal, Shop…" required></label>
+<div class="connection-fields"><label class="settings-label">IMAP host<input name="host" value="<?=Security::e($fields['host'])?>" placeholder="mail.example.com" required></label><label class="settings-label">Port<input type="number" name="port" min="1" max="65535" value="<?=Security::e($fields['port'])?>" required></label></div>
+<fieldset class="choice-field"><legend>Encryption</legend><div class="interval-choices"><?php foreach(['ssl'=>'SSL / TLS','tls'=>'STARTTLS'] as $value=>$label):?><label class="choice-pill"><input type="radio" name="tls" value="<?=$value?>" <?=$fields['tls']===$value?'checked':''?>><span><?=$label?></span></label><?php endforeach;?></div></fieldset>
+<label class="settings-label">Username<input name="username" value="<?=Security::e($fields['username'])?>" autocomplete="off" required></label>
+<label class="settings-label">Mailbox password<input type="password" name="imap_password" autocomplete="new-password" placeholder="Blank keeps password for the same host and user"></label>
+<label class="settings-label">Mailbox folder<input name="folder" value="<?=Security::e($fields['folder'])?>" required></label>
+<label class="settings-label">Current app password<input type="password" name="current_password" autocomplete="current-password" required></label>
+<p class="field-hint">Mailbox passwords are never displayed. Both actions verify this mailbox; saving only happens after a successful test.</p>
+<p id="imapTestResult" class="field-hint" role="status" hidden></p><div class="connection-actions"><button class="button" name="intent" value="test">Test Connection</button><button class="button primary" name="intent" value="save">Test &amp; save mailbox</button></div></form></section>
+<?php if($editRow):?><a class="button" href="/settings.php#mailboxEditor">Add another mailbox</a><?php endif;?>

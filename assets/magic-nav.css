@@ -1,0 +1,35 @@
+/* The wrapper has no paint layer. Only the SVG path and active circle paint. */
+@media(max-width:900px){
+ body{--nav-reserve:calc(84px + env(safe-area-inset-bottom,0px))}
+ .bottom-nav.magic-nav{position:fixed;z-index:100;left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));display:block;height:56px;padding:0;border:0;border-radius:0;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;overflow:visible;pointer-events:none;-webkit-tap-highlight-color:transparent;isolation:isolate}
+ .bottom-nav.magic-nav::before,.bottom-nav.magic-nav::after{content:none!important;background:transparent!important;box-shadow:none!important;pointer-events:none!important}
+ .magic-surface{position:absolute;inset:0;width:100%;height:56px;overflow:visible;pointer-events:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.12))}
+ .magic-surface-links rect{fill:transparent;stroke:none;pointer-events:all}
+ .magic-surface-path{fill:var(--surface);stroke:var(--border-color);stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:visiblePainted}
+ .magic-nav-items{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));height:56px;padding:0 3px;z-index:2;background:transparent!important;pointer-events:none}
+ .magic-nav-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;height:56px;min-width:0;padding:6px 3px 4px;border-radius:12px;background:transparent!important;color:var(--muted);text-decoration:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;pointer-events:none;transition:color .2s,transform .15s}
+ .magic-nav.has-clipped-hit-area .magic-nav-item{pointer-events:auto}
+ .magic-nav-item>.magic-tab-icon{width:20px;height:20px;flex-shrink:0;transition:opacity .2s,transform .35s}
+ .magic-nav-label{display:block;font-size:10px;line-height:1.3;font-weight:600;letter-spacing:.1px;white-space:nowrap}
+ .magic-nav-item.is-active{color:var(--soft-text)}
+ .magic-nav-item.is-active>.magic-tab-icon{opacity:0;transform:translateY(-16px)}
+ .magic-nav-item:active{transform:scale(.95)}
+ .magic-nav-item:focus-visible{outline:2px solid var(--accent);outline-offset:-5px}
+ .magic-indicator{position:absolute;left:calc(3px + (100% - 6px) * (var(--active-index) + .5) / 4);top:-16px;z-index:3;display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--accent);border-radius:50%;background:var(--accent);color:var(--on-accent);box-shadow:0 4px 16px var(--soft);pointer-events:auto;cursor:pointer;transform:translateX(-50%);transition:transform .45s cubic-bezier(.34,1.56,.64,1);will-change:transform}
+ .magic-nav.is-positioned .magic-indicator{left:0;transform:translateX(var(--indicator-x))}
+ .magic-indicator .magic-tab-icon{width:20px;height:20px;stroke-width:1.9}
+ .magic-nav.is-animating .magic-indicator,.magic-nav.is-positioning .magic-indicator{transition:none}
+ .magic-nav.is-positioning .magic-nav-item>.magic-tab-icon{transition:none}
+ .app-toast{bottom:calc(var(--nav-reserve) + 8px)}
+ .message-list,.reader-content,.aliases-content,.settings-content{padding-bottom:var(--nav-reserve)!important}
+ .message-list,.reader-scroll,.aliases-content,.settings-content{scroll-padding-bottom:var(--nav-reserve)}
+}
+@media(min-width:901px){.bottom-nav.magic-nav{display:none!important}}
+@media(prefers-reduced-motion:reduce){.magic-indicator,.magic-nav-item,.magic-nav-item>.magic-tab-icon{transition:none!important;will-change:auto}}
+
+/* Real trailing scroll space: scroll-padding alone never extends scroll range. */
+@media(max-width:900px){
+.aliases-content .alias-list::after{content:"";display:block;grid-column:1/-1;min-height:calc(var(--nav-reserve) + 24px);pointer-events:none}
+.settings-content::after{content:"";display:block;height:calc(var(--nav-reserve) + 24px);flex:none;pointer-events:none}
+.message-list::after{content:"";display:block;height:24px;flex:none;pointer-events:none}
+}

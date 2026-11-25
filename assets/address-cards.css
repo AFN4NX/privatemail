@@ -1,0 +1,41 @@
+/* Responsive address cards; list remains the only scrolling region. */
+.aliases-content .alias-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:14px;align-content:start;padding:4px 4px 12px;scroll-padding-top:4px}
+.aliases-content .alias-card{position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;gap:22px;min-width:0;padding:20px;border-radius:16px;border:1px solid var(--border-color);background:var(--surface);box-shadow:var(--shadow);transition:border-color .2s,transform .2s,box-shadow .2s}
+.aliases-content .alias-main{align-items:flex-start;gap:12px;min-width:0}.aliases-content .alias-main>div:last-child{flex:1;min-width:0;padding-top:1px}.aliases-content .alias-main strong{display:block;font-size:15px;line-height:1.6;letter-spacing:-.2px;overflow-wrap:anywhere;word-break:normal}.aliases-content .alias-domain-caption{margin-top:5px;font-size:12px}
+.aliases-content .alias-avatar{width:38px;height:38px;border-radius:12px}.alias-avatar svg{width:20px;height:20px}
+.aliases-content .alias-actions{display:flex;justify-content:flex-end;align-items:center;gap:8px;width:100%;padding-top:15px;border-top:1px solid var(--border-color)}
+.aliases-content .alias-action{position:relative;display:grid;place-items:center;flex:0 0 40px;width:40px;min-width:40px;height:40px;min-height:40px;padding:0;border-radius:11px;border:1px solid var(--border-color);background:var(--surface2);color:var(--muted);transition:background .2s,color .2s,border-color .2s,transform .15s}
+.alias-action svg{width:19px;height:19px;transition:transform .22s}.aliases-content .alias-action.danger{color:var(--danger)}.aliases-content .alias-action.is-copied{color:var(--soft-text);border-color:var(--accent);background:var(--soft)}
+.aliases-content .alias-action:active{transform:scale(.94)}.alias-action:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.alias-action.is-copied svg{animation:alias-check-in .22s ease-out}
+.alias-action[data-tooltip]::after{position:absolute;bottom:calc(100% + 8px);right:0;z-index:5;content:attr(data-tooltip);white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s;padding:6px 9px;border:1px solid var(--border-color);border-radius:8px;background:var(--surface);color:var(--text);box-shadow:var(--shadow);font-size:11px;font-weight:500}
+.alias-action:focus-visible::after{opacity:1;transform:translateY(0)}.alias-empty{grid-column:1/-1}
+@media(hover:hover){.aliases-content .alias-card:hover{transform:translateY(-2px);border-color:var(--accent)}.aliases-content .alias-action:hover{color:var(--soft-text);border-color:var(--accent);background:var(--soft)}.aliases-content .alias-action.danger:hover{color:var(--danger);border-color:var(--danger);background:var(--danger-soft)}.alias-action:hover::after{opacity:1;transform:translateY(0)}.copy-alias:hover svg{transform:translateY(-2px) rotate(-6deg)}.alias-open:hover svg{transform:translateY(-3px)}.delete-alias:hover svg{transform:rotate(-9deg)}}
+@keyframes alias-check-in{from{transform:scale(.65);opacity:.3}to{transform:scale(1);opacity:1}}
+@media(max-width:900px){.aliases-content .alias-list{padding-bottom:var(--nav-reserve)}.aliases-content .alias-card{padding:18px;gap:18px}}
+@media(prefers-reduced-motion:reduce){.aliases-content .alias-card,.aliases-content .alias-action,.alias-action svg,.alias-action::after{transition:none!important;animation:none!important;transform:none!important}}
+
+/* One compact controls area, with a second row only on small viewports. */
+.aliases-content{padding:20px}
+.address-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(200px,440px) 44px;align-items:center;gap:14px;flex-shrink:0;margin-bottom:16px;min-width:0}
+.address-title{display:flex;align-items:center;gap:10px;min-width:0}.address-title h1{margin:0;font-size:23px;font-weight:600;line-height:1.3;letter-spacing:-.6px}.address-total{display:grid;place-items:center;min-width:25px;height:25px;padding:0 7px;border:1px solid var(--border-color);border-radius:999px;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:500}
+.address-tools{display:flex;align-items:center;gap:8px;min-width:0}.address-tools .alias-search{flex:1;min-width:0;min-height:44px;height:44px;margin:0;padding:10px 12px;border-radius:12px}.address-tools .alias-search svg{width:17px;height:17px;flex-shrink:0}.address-tools .alias-search input{font-size:14px}
+.address-add{display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:12px;background:var(--accent);color:var(--on-accent);transition:background .2s,transform .15s}.address-add:hover{background:var(--accent-hover)}.address-add:active{transform:scale(.95)}.address-add svg{width:21px;height:21px}
+.alias-sort-control{position:relative;display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;border:1px solid var(--border-color);border-radius:12px;background:var(--surface2);color:var(--muted)}.alias-sort-control svg{pointer-events:none;width:19px;height:19px}.alias-sort-control select{position:absolute;inset:0;width:100%;height:100%;min-height:0;padding:0;margin:0;opacity:0;cursor:pointer}.alias-sort-control:focus-within{outline:2px solid var(--accent);outline-offset:2px}.alias-sort-control:hover{color:var(--soft-text);border-color:var(--accent)}
+.aliases-content .alias-card{border-color:var(--accent);border-color:color-mix(in srgb,var(--accent) 28%,var(--border-color))}.aliases-content .alias-actions{border-top-color:color-mix(in srgb,var(--accent) 12%,var(--border-color))}
+@media(max-width:900px){.aliases-content{padding:16px 13px 12px}.address-controls{grid-template-columns:minmax(0,1fr) 44px;grid-template-areas:"title add" "tools tools";gap:10px;margin-bottom:12px}.address-title{grid-area:title}.address-title h1{font-size:21px}.address-add{grid-area:add}.address-tools{grid-area:tools}.address-tools .alias-search input{font-size:16px}.aliases-content .alias-list{gap:10px}}
+@media(prefers-reduced-motion:reduce){.address-add{transition:none}}
+/* Polished card actions and compact heading. */
+.aliases-content .alias-actions{justify-content:center;gap:12px}
+.address-title h1{font-size:25px;font-weight:700;letter-spacing:-.85px;line-height:1.25}
+.address-total{min-width:31px;height:28px;padding:0 9px;border-color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--border-color));background:var(--soft);color:var(--soft-text);font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.aliases-content .alias-card{border-color:color-mix(in srgb,var(--accent) 42%,var(--border-color))}
+.aliases-content .alias-action:not(.danger){color:var(--soft-text);background:var(--soft);border-color:color-mix(in srgb,var(--accent) 32%,var(--border-color))}
+.aliases-content .alias-avatar{background:var(--soft);color:var(--soft-text);border:1px solid color-mix(in srgb,var(--accent) 25%,var(--border-color))}
+.address-add{box-shadow:0 3px 12px var(--soft)}
+.address-add svg{transform-origin:center;animation:alias-add-arrive .65s cubic-bezier(.22,1,.36,1) both}
+@keyframes alias-add-arrive{from{transform:rotate(-90deg) scale(.65);opacity:.4}to{transform:rotate(0) scale(1);opacity:1}}
+@media(hover:hover){.address-add:hover svg{animation:alias-add-turn .45s cubic-bezier(.22,1,.36,1) both}.aliases-content .alias-action:not(.danger):hover{background:var(--accent);color:var(--on-accent)}}
+@keyframes alias-add-turn{from{transform:rotate(0)}to{transform:rotate(180deg)}}
+.address-add:active svg{transform:scale(.85)}
+@media(max-width:900px){.address-title h1{font-size:23px}}
+@media(prefers-reduced-motion:reduce){.address-add svg,.address-add:hover svg{animation:none!important;transition:none!important;transform:none!important}}
