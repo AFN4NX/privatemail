@@ -2,8 +2,6 @@
 
 Final approved base: 25 November 2026, Asia/Dhaka.
 
-এই document বর্তমান source অনুযায়ী লেখা। পুরোনো installation notes বা preview pages-এর সঙ্গে পার্থক্য থাকলে এই document ও actual source অনুসরণ করুন। এটি source release, live mailbox data backup নয়।
-
 ## 1. Project overview
 
 PrivateMail একটি personal, receive-only webmail workspace। একাধিক IMAP mailbox-এর mail এক inbox-এ দেখা, catch-all address তালিকা manage করা এবং verification code সহজে copy করা যায়। PHP server, SQLite local index এবং vanilla JavaScript frontend ব্যবহার করে। এটি multi-user SaaS নয়: একটি app access password দিয়ে একই personal workspace-এ প্রবেশ করা হয়। IMAP accounts app users নয়। SMTP sending নেই।
